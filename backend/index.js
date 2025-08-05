@@ -1,23 +1,10 @@
-const Firebird = require('node-firebird')
+const getConnection = require('./database/connection');
 
-const options = {
-  host: 'localhost',
-  port: 3050,
-  database: 'C:\\VSCode\\fullstack-lista-de-tarefas\\LISTA-DE-TAREFAS.FDB',
-  user: 'sysdba',
-  password: 'masterkey'  
-}
-
-Firebird.attach(options, function(err, db) {
-  if (err) throw err
-
-  console.info('Conectado ao banco de dados Firebird!')
-
-  db.query('SELECT * FROM tarefas', function(err, result) {
-    if (err) throw err
-
-    console.log(result)
-
+getConnection((err, db) => {
+  if (err) {
+    console.log('❌ Falha ao conectar com o banco.');
+  } else {
+    console.log('✅ Conexão com Firebird funcionando.');
     db.detach()
-  })
+  }
 })
