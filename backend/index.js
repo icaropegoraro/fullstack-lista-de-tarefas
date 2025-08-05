@@ -1,20 +1,23 @@
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
+const Firebird = require('node-firebird')
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+const options = {
+  host: 'localhost',
+  port: 3050,
+  database: 'C:\\VSCode\\fullstack-lista-de-tarefas\\LISTA-DE-TAREFAS.FDB',
+  user: 'sysdba',
+  password: 'masterkey'  
+}
 
-app.get('/', (req, res) => {
-  res.send('API está rodando 🚀');
-});
+Firebird.attach(options, function(err, db) {
+  if (err) throw err
 
-const authRoutes = require('./routes/authRoutes');
-const taskRoutes = require('./routes/taskRoutes');
+  console.info('Conectado ao banco de dados Firebird!')
 
-app.use('/api/auth', authRoutes);
-app.use('/api/tasks', taskRoutes);
+  db.query('SELECT * FROM tarefas', function(err, result) {
+    if (err) throw err
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
+    console.log(result)
+
+    db.detach()
+  })
+})
