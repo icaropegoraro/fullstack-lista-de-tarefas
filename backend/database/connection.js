@@ -1,5 +1,8 @@
-require('dotenv').config()
-const firebird = require('node-firebird')
+import dotenv from 'dotenv'
+
+dotenv.config()
+
+import firebird from 'node-firebird'
 
 const options = {
     host: process.env.DB_HOST,
@@ -9,8 +12,7 @@ const options = {
     password: process.env.DB_PASSWORD
 }
 
-function getConnection(callback) {
-
+export const getConnection = (callback) =>  {
     firebird.attach(options, (err, db) => {
         if (err) {
             console.error('Erro ao conectar com Firebird:', err)
@@ -19,5 +21,3 @@ function getConnection(callback) {
         callback(null, db)
     })
 }
-
-module.exports = getConnection
