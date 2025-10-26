@@ -22,8 +22,7 @@ fastify.get('/', async (request, reply) => {
 
 fastify.register(tarefasRoutes);
 
-
-const start = async () => {
+const start = async (req, err) => {
     try {
         await fastify.listen({ port: 3000, host: '0.0.0.0' });
         fastify.log.info(`Servidor rodando em http://localhost:3000`);

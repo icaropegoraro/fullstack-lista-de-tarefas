@@ -1,43 +1,71 @@
 import { executeQuery } from '../config/database.js';
 
-export const getTarefas = (queryParams, callback) => {
+export const getTarefasWithFilters = (queryParams, callback) => {
     let sql = `select t.*
-                 from tarefas t
-                where 1 = 1
+               from tarefas t
+               where 1 = 1
               `
 
     let filtro = []
 
     if (queryParams.user) {
-        sql += 'and t.cod_usuario = ?';
+        sql += ' and t.cod_usuario = ?';
         filtro.push(queryParams.user)
     }
 
     if (queryParams.ignoreChecked) {
-        sql += 'and t.idf_check = ?';
-        filtro.push('N')
+        if (queryParams.ignoreChecked) {
+            sql += ' and t.idf_check = ?';
+            filtro.push('N')
+        }
     }
 
     if (queryParams.ignoreNoAtive) {
-        sql += 'and t.idf_ativo = ?';
-        filtro.push('S')
+        if (queryParams.ignoreNoAtive) {
+            sql += ' and t.idf_ativo = ?';
+            filtro.push('S')
+        }
     }
     
     executeQuery(sql, filtro, callback)
 }
 
-export const createTarefa = (tarefaData, callback) => {
-    let sql = `insert
-                into tarefas (
-                    cod_usuario,
-                    tarefa,
-                    idf_ativo,
-                    idf_check,
-                    criado_em
-                ) values (?, ?, 'S', 'N', current_timestamp)
-                returning codigo`
+export const insertTarefa = (tarefaData, callback) => {
+    const sql = `insert
+                  into tarefas (
+                       cod_usuario,
+                       tarefa,
+                       idf_ativo,
+                       idf_check,
+                       criado_em
+             ) values (?, ?, 'S', 'N', current_timestamp)
+             returning codigo`;
+    
+    const filtro = [tarefaData.cod_usuario, tarefaData.tarefa];
+    
+    executeQuery(sql, filtro, callback);
+}
 
-    let filtro = [tarefaData.cod_usuario, tarefaData.tarefa]
+export const updateTarefa = (queryParams, callback) => {
+    const setClauses = [];
+    const params = [];
+    const codigoTarefa = queryParams.cod_tarefa;
 
-    executeQuery(sql, filtro, callback)
+    if (!codigoTarefa) {
+        return callback(new Error("cod_tarefa is required for update"));
+    }
+
+    for (const coluna in queryParams) {
+        if (coluna === 'cod_tarefa') continue;
+        setClauses.push(`${coluna} = ?`);
+        params.push(queryParams[coluna]);
+    }
+
+    params.push(codigoTarefa);
+
+    const sql = `update tarefas 
+                    set ${setClauses.join(', ')} 
+                  where codigo = ?`;
+
+    executeQuery(sql, params, callback);
 }
